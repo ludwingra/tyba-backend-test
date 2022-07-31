@@ -15,7 +15,7 @@ export class AuthMiddleware {
     if (!jwtToken) return res.status(401).json({ err: 'Token not found' });
   
     try {
-      let payload = jwt.verify(jwtToken, process.env.SECRET_KEY_JWT_API!);
+      let payload = jwt.verify(jwtToken, process.env.TYBA_SECRET_JWT_KEY!);
       req.user = payload;
       next();
     } catch (error) {

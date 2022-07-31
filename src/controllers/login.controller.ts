@@ -37,14 +37,14 @@ export class LoginController {
 
       // If the user does not exist
       if (!user) {
-        throw { message: '¡Invalid credentials!', error: 'Invalid credentials', code: 20 };
+        throw { message: '¡Invalid credentials!', error: 'Invalid credentials', code: 2 };
       }
 
       let compare = bcrypt.compareSync(req.body.password, user.password);
 
       // If the user does not exist
       if (!compare) {
-        throw { message: '¡Invalid credentials!', error: 'Invalid credentials', code: 20 };
+        throw { message: '¡Invalid credentials!', error: 'Invalid credentials', code: 2 };
       }
 
       // Generate login token
@@ -80,7 +80,7 @@ export class LoginController {
    * @param next 
    * @returns 
    */
-  public logup = async (req: Request, res: Response, next: any) => {
+  public signup = async (req: Request, res: Response, next: any) => {
     const errors = validationResult(req);
     const { body } = req;
 

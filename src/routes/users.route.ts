@@ -11,7 +11,7 @@ const userController = new UserController();
 const loginController = new LoginController();
 const authMiddleware = new AuthMiddleware(); 
 
-router.get('/', userController.getAll)
+router.get('/', [ authMiddleware.auth ],userController.getAll)
 router.get('/:id', [ authMiddleware.auth ],userController.getById)
 router.post('/', [ 
   authMiddleware.auth,
@@ -25,11 +25,11 @@ router.post('/login', [
   check('email').not().isEmpty().exists().withMessage("Email is required"),
   check('password').not().isEmpty().exists().withMessage("Password is required"),
 ], loginController.login)
-router.post('/logup', [
+router.post('/signup', [
   check('email').not().isEmpty().exists().withMessage("Email is required"),
   check('password').not().isEmpty().exists().withMessage("Password is required"),
   check('name').not().isEmpty().exists().withMessage("Name is required"),
-], loginController.logup)
+], loginController.signup)
 router.put('/auth/password-update', [
   authMiddleware.auth,
   check('password').not().isEmpty().exists().withMessage("El password es requerido"),
