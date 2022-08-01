@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
-import moment from "moment";
+import axios from "axios";
+import * as jwt from "jsonwebtoken";
 import _ from "underscore";
 
 import { Common } from "../helper/common";
 import UsersModel from "../models/users.model";
+import TransactionsModel from '../models/transactions.model';
 
-export class UserController {
+export class CommonController {
 
   /**
    * Get all users
@@ -190,4 +191,86 @@ export class UserController {
       });
     }
   }
+
+  /**
+   * Search restaurant
+   * @param req 
+   * @param res 
+   * @param next 
+   */
+  async searchRestaurant(req: Request, res: Response, next: any){
+    try {
+      const { body } = req;
+      const apiKey = process.env.GOOGLE_API_ID;
+      const location = `${body.city}%20${body.country}`;
+      const url: string = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurantes%20en%20${location}&key=${apiKey}`;
+      const requestSearchGoogle: any = await axios.get(url);
+      const infoToken: any =  jwt.decode((req.headers.authorization) as any);
+
+      await TransactionsModel().create({
+        user_id: infoToken.id,
+        type: 'query',
+        value: `restaurantes en ${body.city} ${body.country}`,
+      })
+
+      res.json(requestSearchGoogle.data.results)
+
+    } catch (error) {
+      new Common().showLogMessage('Controlled bug', error, 'error');
+      next({
+        message: 'An error has occurred in our system, please try again',
+        error,
+        code: 10
+      });
+    }
+  }
+
+  /**
+   * Get all users
+   * @param req 
+   * @param res 
+   * @param next 
+   */
+   async getAllTransactions(req: Request, res: Response, next: any) {
+    try {
+      // Parameters pagination
+      let page: number = req.query.page ? parseInt(req.query.page as string) : 1;
+      let limit: number = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      let offset = (page - 1) * limit;
+
+      // Query
+      const results = await TransactionsModel().findAndCountAll({
+        limit,
+        offset,
+        attributes: ['id','type', 'value','created_at'],
+        include: [{
+          model: UsersModel(),
+          as: 'transaction_users',
+          attributes: ['id','email','name']
+        }],
+      });
+       // Prepare response data
+      let rpt = {
+        data: results.rows,
+        meta: {
+          total: results.count,
+          page
+        }
+      }
+      // Response
+      res.header({
+        'x-total-count': results.count, 'access-control-expose-headers':'X-Total-Count' 
+      }).json({...rpt});
+    } catch (error) {
+      // Log error
+      new Common().showLogMessage('Controlled bug', error, 'error');
+      // middleware log error
+      next({
+        message: 'An error has occurred in our system, please try again',
+        error,
+        code: 10
+      });
+    }
+  }
+  
 }

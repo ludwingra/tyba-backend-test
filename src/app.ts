@@ -9,7 +9,7 @@ import { Connection } from "./db/connection";
 import { ErrorMiddleware } from "./middleware/errorHandler";
 import { NotFoundMiddleware } from "./middleware/notFoundHandler";
 // Routes
-import usersRoutes from "./routes/users.route";
+import usersRoutes from "./routes/common.route";
 
 
 export class App {

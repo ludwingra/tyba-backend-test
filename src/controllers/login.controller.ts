@@ -7,6 +7,7 @@ import * as jwt from "jsonwebtoken";
 import { Connection } from "../db/connection";
 import { Common } from "../helper/common";
 import UsersModel from "../models/users.model";
+import TransactionsModel from '../models/transactions.model';
 
 export class LoginController {
 
@@ -47,8 +48,15 @@ export class LoginController {
         throw { message: '¡Invalid credentials!', error: 'Invalid credentials', code: 2 };
       }
 
+      await TransactionsModel().create({
+        user_id: user.id,
+        type: 'login',
+        value: `Login user ${user.email}`,
+      })
+      
       // Generate login token
       let token = await this.generateToken(user);
+
 
       // The response is returned
       res.header({ 'Authorization': token }).json({

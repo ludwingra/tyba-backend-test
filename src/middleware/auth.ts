@@ -38,7 +38,7 @@ export class TokenFormMiddleware {
     if (!jwtToken) return res.status(401).json({ err: 'Token not found' });
   
     try {
-      let payload = jwt.verify(jwtToken, process.env.SECRET_KEY_JWT_API_FORM!);
+      let payload = jwt.verify(jwtToken, process.env.TYBA_SECRET_JWT_KEY!);
       req.form = payload;
       next();
     } catch (error) {
